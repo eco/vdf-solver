@@ -1,0 +1,8 @@
+dist: xenial
+sudo: required
+language: node_js
+cache: npm
+script:
+  - npm run lint
+  - npm run test
+  - npm run coverage && npx coveralls < coverage/lcov.info

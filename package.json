@@ -1,0 +1,37 @@
+{
+  "name": "vdf-solver",
+  "version": "1.0.0",
+  "description": "Standalone VDF Prover",
+  "main": "vdf.js",
+  "bin": "cli.js",
+  "scripts": {
+    "lint": "eslint '**/**.js'",
+    "format": "eslint --fix '**/**.js'",
+    "test": "mocha",
+    "coverage": "nyc --reporter=html --reporter=text --reporter=lcov mocha"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/BeamNetwork/vdf-solver.git"
+  },
+  "author": "Beam Engineering <eng@beam.io>",
+  "homepage": "https://github.com/BeamNetwork/vdf-solver#readme",
+  "license": "MIT",
+  "dependencies": {
+    "bignum": "^0.13.0",
+    "command-line-args": "^5.1.1",
+    "web3": "^1.0.0-beta.55"
+  },
+  "devDependencies": {
+    "babel-eslint": "^10.0.2",
+    "chai": "^4.2.0",
+    "coveralls": "^3.0.4",
+    "eslint": "^6.0.1",
+    "eslint-config-airbnb-base": "^13.1.0",
+    "eslint-plugin-chai-friendly": "^0.4.1",
+    "eslint-plugin-import": "^2.18.0",
+    "eslint-plugin-mocha": "^5.3.0",
+    "mocha": "^6.1.4",
+    "nyc": "^14.1.1"
+  }
+}
