@@ -67,24 +67,53 @@ for (let t = 1; t <= 7; t += 1) {
   factors.push(f);
 }
 
-function prove(xin, tin, nin) {
+async function prove(xin, tin, nin, callback, prevstate) {
   const x = BigInt(xin);
   const n = BigInt(nin);
   const t = BigInt(tin);
 
   const bytelen = Math.ceil(n.toString(16).length / 2);
-  const stops = 1n << BigInt(Math.min(Number(tin), factors.length - 1));
 
-  const ys = [0n];
-  {
-    const blocksize = (1n << t) / stops;
-    let tmp = x;
-    for (let i = 0n; i < stops; i += 1n) {
-      tmp = squarings(tmp, blocksize, n);
-      ys.push(tmp);
+  let state;
+  if (prevstate) {
+    state = {
+      stops: BigInt(prevstate.stops),
+      blocksize: BigInt(prevstate.blocksize),
+      ys: prevstate.ys.map(v => BigInt(v)),
+    };
+  } else {
+    const stops = 1n << BigInt(Math.min(Number(tin), factors.length - 1));
+
+    state = {
+      stops,
+      blocksize: (1n << t) / stops,
+      ys: [x],
+    };
+  }
+
+  if (state.stops * state.blocksize !== (1n << t)) {
+    throw Error('State size mismatch');
+  }
+  if (state.ys[0] !== x) {
+    throw Error('State number mismatch');
+  }
+
+  for (let i = 1n; i <= state.stops; i += 1n) {
+    if (!state.ys[i]) {
+      state.ys[i] = squarings(state.ys[i - 1n], state.blocksize, n);
+      if (callback) {
+        // eslint-disable-next-line no-await-in-loop
+        if (!await callback({
+          stops: state.stops.toString(),
+          blocksize: state.blocksize.toString(),
+          ys: state.ys.map(v => v.toString()),
+        }, Number(i), Number(state.stops))) {
+          return [];
+        }
+      }
     }
   }
-  const y = modpow(ys[stops], 2n, n);
+  const y = modpow(state.ys[state.stops], 2n, n);
 
   let xi = (x * x) % n;
   let yi = y;
@@ -99,7 +128,7 @@ function prove(xin, tin, nin) {
     if (f) {
       uiprime = 1n;
       f.forEach(([divisor, dividend, rfac]) => {
-        let base = ys[stops * divisor / dividend];
+        let base = state.ys[state.stops * divisor / dividend];
 
         if (rfac && rfac.length > 0) {
           let e = 1n;
