@@ -1,18 +1,22 @@
 const assert = require('assert');
 const { spawnSync } = require('child_process');
 const { expect } = require('chai');
+const os = require('os');
+const path = require('path');
 
-const { prove, modpow, squarings } = require('../vdf.js');
+const {
+  prove, modexp, squarings, version,
+} = require('../vdf.js');
 
 // eslint-disable-next-line max-len
 const n = '0xc7970ceedcc3b0754490201a7aa613cd73911081c790f5f1a8726f463550bb5b7ff0db8e1ea1189ec72f93d1650011bd721aeeacc2acde32a04107f0648c2813a31f5b0b7765ff8b44b4b6ffc93384b646eb09c7cf5e8592d40ea33c80039f35b4f14a04b51f7bfd781be4d1673164ba8eb991c2c4d730bbbe35f592bdef524af7e8daefd26c66fc02c479af89d64d373f442709439de66ceb955f3ea37d5159f6135809f85334b5cb1813addc80cd05609f10ac6a95ad65872c909525bdad32bc729592642920f24c61dc5b3c3b7923e56b16a4d9d373d8721f24a3fc0f1b3131f55615172866bccc30f95054c824e733a5eb6817f7bc16399d48c6361cc7e5';
 
 describe('VDF', async () => {
   it('incremental computation', async () => {
-    const a = modpow(3n, 2n ** BigInt(1 << 5), 101n);
-    const b = modpow(a, 2n ** BigInt(1 << 5), 101n);
+    const a = modexp(3n, 2n ** BigInt(1 << 5), 101n);
+    const b = modexp(a, 2n ** BigInt(1 << 5), 101n);
 
-    const c = modpow(3n, 2n ** BigInt(1 << 6), 101n);
+    const c = modexp(3n, 2n ** BigInt(1 << 6), 101n);
 
     assert.strictEqual(b, c);
   });
@@ -20,13 +24,13 @@ describe('VDF', async () => {
   it('squarings non-block-aligned', async () => {
     const a = squarings(3n, 123456n, 101n);
     assert.strictEqual(a, 31n);
-    assert.strictEqual(a, modpow(3n, 1n << 123456n, 101n));
+    assert.strictEqual(a, modexp(3n, 1n << 123456n, 101n));
   });
 
   it('squarings block-aligned', async () => {
     const b = squarings(3n, 65536n, 101n);
     assert.strictEqual(b, 31n);
-    assert.strictEqual(b, modpow(3n, 1n << 65536n, 101n));
+    assert.strictEqual(b, modexp(3n, 1n << 65536n, 101n));
   });
 
   it('x=2 t=4', async () => {
@@ -103,7 +107,7 @@ describe('VDF', async () => {
   });
 
   it('runs as a process', async () => {
-    const result = spawnSync('./cli.js', ['--x', '0x374cd38778e61027a78a9a6f98753f272ca8cbc23b909a8ab041f5030b17abfa', '--t', '7', '--n', n], { encoding: 'utf-8' });
+    const result = spawnSync('node', [path.resolve('cli.js'), '--x', '0x374cd38778e61027a78a9a6f98753f272ca8cbc23b909a8ab041f5030b17abfa', '--t', '7', '--n', n], { encoding: 'utf-8' });
     const [y, u] = JSON.parse(result.stdout);
 
     expect(result.status).to.equal(0);
@@ -129,5 +133,10 @@ describe('VDF', async () => {
 
   it.skip('long proof', async () => {
     await prove('0x374cd38778e61027a78a9a6f98753f272ca8cbc23b909a8ab041f5030b17abfa', 25, n);
+  });
+
+  it('reports versions', async () => {
+    const cpus = Array.from(new Set().add(...(os.cpus().map(cpu => cpu.model))));
+    console.log(version(), process.versions, cpus);
   });
 });

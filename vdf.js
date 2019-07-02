@@ -1,41 +1,27 @@
 /* eslint-disable no-bitwise */
 
-const Web3 = require('web3');
-const bignum = require('bignum');
-
-const web3 = new Web3();
+const { modexp, version } = require('bindings')('modexp.node');
+const { keccak256 } = require('js-sha3');
 
 function bnHex(bn, bytes) {
-  const hex = bn.toString(16);
-  return `0x${hex.padStart(bytes * 2, '0')}`;
-}
-
-function modpow(x, e, n) {
-  const xbn = bignum(x.toString());
-  const ebn = bignum(e.toString());
-  const nbn = bignum(n.toString());
-
-  const r = xbn.powm(ebn, nbn);
-  return BigInt(r.toString());
+  return bn.toString(16).padStart(bytes * 2, '0');
 }
 
 function squarings(x, s, n) {
-  const xbn = bignum(x.toString());
-  const nbn = bignum(n.toString());
-  const ebn = bignum(1).shiftLeft(32768);
+  const e = 1n << 32768n;
 
-  let r = xbn;
+  let r = x;
 
   let i;
   for (i = 0n; (i + 32768n) <= s; i += 32768n) {
-    r = r.powm(ebn, nbn);
+    r = modexp(r, e, n);
   }
 
   if (i < s) {
-    r = r.powm(bignum((1n << (s - i)).toString()), nbn);
+    r = modexp(r, 1n << (s - i), n);
   }
 
-  return BigInt(r.toString());
+  return r;
 }
 
 // Each entry is for computing i
@@ -113,7 +99,7 @@ async function prove(xin, tin, nin, callback, prevstate) {
       }
     }
   }
-  const y = modpow(state.ys[state.stops], 2n, n);
+  const y = modexp(state.ys[state.stops], 2n, n);
 
   let xi = (x * x) % n;
   let yi = y;
@@ -135,7 +121,7 @@ async function prove(xin, tin, nin, callback, prevstate) {
           rfac.forEach((r) => {
             e *= rs[r];
           });
-          base = modpow(base, e, n);
+          base = modexp(base, e, n);
         }
         uiprime = (uiprime * base) % n;
       });
@@ -146,21 +132,26 @@ async function prove(xin, tin, nin, callback, prevstate) {
 
     Usqrt.push(uiprime);
 
-    const res = web3.utils.soliditySha3(
-      bnHex(x, bytelen),
-      bnHex(y, bytelen),
-      bnHex(uiprime, bytelen),
-      i,
-    );
-    const rbn = BigInt(res);
+    const hex = bnHex(x, bytelen)
+      + bnHex(y, bytelen)
+      + bnHex(uiprime, bytelen)
+      + bnHex(i, 32);
+
+    const result = [];
+    for (let j = 0; j < hex.length; j += 2) {
+      result.push(parseInt(hex.substr(j, 2), 16));
+    }
+    const rbn = BigInt(`0x${keccak256(result)}`);
     rs.push(rbn);
 
     // set up x_i+1 and y_i+1
-    xi = (modpow(xi, rbn, n) * ui) % n;
-    yi = (modpow(ui, rbn, n) * yi) % n;
+    xi = (modexp(xi, rbn, n) * ui) % n;
+    yi = (modexp(ui, rbn, n) * yi) % n;
   }
 
   return [y, Usqrt];
 }
 
-module.exports = { prove, modpow, squarings };
+module.exports = {
+  prove, modexp, squarings, version,
+};

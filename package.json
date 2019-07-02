@@ -5,6 +5,7 @@
   "main": "vdf.js",
   "bin": "cli.js",
   "scripts": {
+    "preinstall": "bash scripts/getssl.sh",
     "lint": "eslint '**/**.js'",
     "format": "eslint --fix '**/**.js'",
     "test": "mocha",
@@ -19,20 +20,26 @@
   "homepage": "https://github.com/BeamNetwork/vdf-solver#readme",
   "license": "MIT",
   "dependencies": {
-    "bignum": "^0.13.0",
+    "bindings": "^1.5.0",
     "command-line-args": "^5.1.1",
-    "web3": "^1.0.0-beta.55"
+    "js-sha3": "^0.8.0",
+    "node-addon-api": "^1.6.3"
   },
   "devDependencies": {
     "babel-eslint": "^10.0.2",
     "chai": "^4.2.0",
     "coveralls": "^3.0.4",
+    "electron": "^5.0.6",
+    "electron-mocha": "^8.0.3",
+    "electron-rebuild": "^1.8.5",
     "eslint": "^6.0.1",
-    "eslint-config-airbnb-base": "^13.1.0",
+    "eslint-config-airbnb-base": "^13.2.0",
     "eslint-plugin-chai-friendly": "^0.4.1",
     "eslint-plugin-import": "^2.18.0",
     "eslint-plugin-mocha": "^5.3.0",
     "mocha": "^6.1.4",
-    "nyc": "^14.1.1"
-  }
+    "nyc": "^14.1.1",
+    "xvfb-maybe": "^0.2.1"
+  },
+  "gypfile": true
 }
