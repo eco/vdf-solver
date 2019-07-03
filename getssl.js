@@ -1,5 +1,3 @@
-/* eslint-disable import/no-extraneous-dependencies */
-
 const crypto = require('crypto');
 const fs = require('fs');
 const assert = require('assert');
