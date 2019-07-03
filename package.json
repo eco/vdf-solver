@@ -5,7 +5,7 @@
   "main": "vdf.js",
   "bin": "cli.js",
   "scripts": {
-    "preinstall": "bash scripts/getssl.sh",
+    "install": "node getssl.js && node-gyp rebuild",
     "lint": "eslint '**/**.js'",
     "format": "eslint --fix '**/**.js'",
     "test": "mocha",
@@ -37,8 +37,12 @@
     "eslint-plugin-chai-friendly": "^0.4.1",
     "eslint-plugin-import": "^2.18.0",
     "eslint-plugin-mocha": "^5.3.0",
+    "extract-zip": "^1.6.7",
     "mocha": "^6.1.4",
     "nyc": "^14.1.1",
+    "request": "^2.88.0",
+    "request-promise-native": "^1.0.7",
+    "rimraf": "^2.6.3",
     "xvfb-maybe": "^0.2.1"
   },
   "gypfile": true
