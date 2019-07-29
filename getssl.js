@@ -19,7 +19,7 @@ const rimraf = require('rimraf');
     const hash = crypto.createHash('sha512');
     hash.update(data, 'binary');
 
-    assert.strictEqual(hash.digest('hex'), 'b8c79023da19f961107a86b5692ee92fb614e29cb91a59862d0a52095a622ae47967d07ddc2196506819758a27e7834d3605c34a788a482edc45b0f92d6834ac');
+    assert.strictEqual(hash.digest('hex'), 'e49a25471eb7265e40103dfa93f4ee18b8f11ec2f8a6e28ad3f46c82fbbda7e3f601337b0c46b8fc10c6bc0f056b5bd2528586a4ec3e56b27b597396732ac9be');
 
     fs.writeFileSync('openssl.zip', data);
 
