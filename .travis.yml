@@ -11,7 +11,7 @@ node_js:
 cache: npm
 script:
   - npm run test
-  - "[[ ${TRAVIS_NODE_VERSION} != node ]] || ( npx electron-rebuild && npx xvfb-maybe electron-mocha )"
+  - "[[ ${TRAVIS_NODE_VERSION} != node ]] || ( npx electron-rebuild && npx xvfb-maybe electron-mocha --file test/vdf.js )"
 addons:
   homebrew:
     packages:
