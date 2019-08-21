@@ -5,7 +5,7 @@
   "main": "vdf.js",
   "bin": "cli.js",
   "scripts": {
-    "install": "node getssl.js && node-gyp rebuild",
+    "install": "node getssl.js && node-gyp rebuild --verbose",
     "lint": "eslint '**/**.js'",
     "format": "eslint --fix '**/**.js'",
     "test": "mocha",
