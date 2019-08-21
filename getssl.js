@@ -6,6 +6,8 @@ const rp = require('request-promise-native');
 const extract = require('extract-zip');
 const rimraf = require('rimraf');
 
+const expected = '90e9f7209015dd95e5e260ebed4234e687a9292ab4b2cccb75e16abef2701a2cd509dab1d4ce1983be135c65cb7ba95746b2003bae54b1998ce338b0cb38c59f';
+
 (async () => {
   if (process.platform === 'win32') {
     rimraf.sync('openssl.zip');
@@ -19,7 +21,7 @@ const rimraf = require('rimraf');
     const hash = crypto.createHash('sha512');
     hash.update(data, 'binary');
 
-    assert.strictEqual(hash.digest('hex'), 'e49a25471eb7265e40103dfa93f4ee18b8f11ec2f8a6e28ad3f46c82fbbda7e3f601337b0c46b8fc10c6bc0f056b5bd2528586a4ec3e56b27b597396732ac9be');
+    assert.strictEqual(hash.digest('hex'), expected);
 
     fs.writeFileSync('openssl.zip', data);
 
