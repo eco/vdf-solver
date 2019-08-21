@@ -12,7 +12,7 @@ const t = 25;
 
 console.log('VDF Solving 10 times');
 
-const cpus = Array.from(new Set().add(...(os.cpus().map(cpu => cpu.model))));
+const cpus = Array.from(new Set().add(...(os.cpus().map((cpu) => cpu.model))));
 
 for (let i = 0; i < loops; i += 1) {
   const start = process.hrtime.bigint();

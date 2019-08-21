@@ -136,7 +136,7 @@ describe('VDF', async () => {
   });
 
   it('reports versions', async () => {
-    const cpus = Array.from(new Set().add(...(os.cpus().map(cpu => cpu.model))));
+    const cpus = Array.from(new Set().add(...(os.cpus().map((cpu) => cpu.model))));
     console.log(version(), process.versions, cpus);
   });
 });
