@@ -4,6 +4,17 @@
 #include <openssl/crypto.h>
 #include <iostream>
 
+extern "C" {
+        void AMM_2048_IFMA(uint64_t res[40], const uint64_t a[40], const uint64_t b[40], const uint64_t m[40], uint64_t k0);
+        void norm2red52_2048(unsigned long out[40], const unsigned long in[32]);
+}
+
+void checker() {
+	unsigned long out[40];
+	unsigned long in[32];
+	norm2red52_2048(out, in);
+}
+
 bool toBN(Napi::Env &env, Napi::BigInt &src, BIGNUM *dst) {
 	size_t count = src.WordCount();
 	std::vector<uint64_t> words(count);
@@ -33,6 +44,8 @@ Napi::BigInt toBigInt(Napi::Env &env, const BIGNUM *src) {
 
 Napi::Value ModExp(const Napi::CallbackInfo& info) {
 	Napi::Env env = info.Env();
+	
+	checker();
 
 
 	if (info.Length() != 3) {
