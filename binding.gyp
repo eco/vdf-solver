@@ -16,7 +16,7 @@
     },
     {
       "target_name": "modexp",
-      "sources": [ "modexp.cc", "rsaz-vpmadd.s", "rsaz-vpmadd.asm" ],
+      "sources": [ "modexp.cc", "rsaz-vpmadd.s" ],
       "cflags!": [ "-fno-exceptions" ],
       "cflags_cc!": [ "-fno-exceptions" ],
       "include_dirs": ["<!@(node -p \"require('node-addon-api').include\")"],
