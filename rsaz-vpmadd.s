@@ -43,7 +43,9 @@
 
 ################################################################################
 .globl norm2red52_2048
+.globl _norm2red52_2048
 .p2align 5
+_norm2red52_2048:
 norm2red52_2048:
 	mov	$0xFFFFFF, %eax
 	kmovd	%eax, %k1
