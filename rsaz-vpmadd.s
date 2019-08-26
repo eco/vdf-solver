@@ -80,50 +80,6 @@ norm2red52_2048:
 
 ################################################################################
 #void AMM_2048_IFMA(
-.set res, %rdi	# uint64_t *rp,
-.set a0, %rsi	# const uint64_t *ap,
-.set bpi, %rdx	# const uint64_t *bptr,
-.set m0, %rcx	# const uint64_t *np,
-.set k0, %r8	# const uint64_t n0);
-
-.set b_ptr, %rax
-
-.set acc0, %r9
-
-.set itr, %r10
-.set t0, %r11
-.set t1, %r12
-.set t2, %r13
-
-.set A0, %zmm0
-.set A1, %zmm20
-.set A2, %zmm2
-.set A3, %zmm3
-.set A4, %zmm4
-
-.set M0, %zmm5
-.set M1, %zmm6
-.set M2, %zmm7
-.set M3, %zmm8
-.set M4, %zmm9
-
-.set ACC0, %zmm10
-.set ACC0_xmm, %xmm10
-.set ACC1, %zmm11
-.set ACC2, %zmm12
-.set ACC3, %zmm13
-.set ACC4, %zmm14
-
-.set Y_curr, %zmm16
-.set B_curr, %zmm18
-
-.set TMP, %zmm1
-.set TMP_xmm, %xmm1
-
-.set ZERO, %zmm30
-.set AND_MASK, %zmm31
-
-
 .globl AMM_2048_IFMA
 .p2align 5
 AMM_2048_IFMA:
@@ -133,202 +89,202 @@ AMM_2048_IFMA:
 	push	%r14
 	push	%r15
 
-	mov	bpi, b_ptr
+	mov	%rdx, %rax
 
-	mov	$1, t0
-	mov	$0x7f, t1
-	kmovq	t0, %k1
-	kmovq	t1, %k2
+	mov	$1, %r11
+	mov	$0x7f, %r12
+	kmovq	%r11, %k1
+	kmovq	%r12, %k2
 
 	mov	.LandMask(%rip), %r15
-	vpbroadcastq	%r15, AND_MASK
-	vpxorq	ZERO, ZERO, ZERO
+	vpbroadcastq	%r15, %zmm31
+	vpxorq	%zmm30, %zmm30, %zmm30
 
 	# Load operands A into registers. A[0] is stored in ALU register, in order to compensate for the latency of IFMA when computing (A*B)[0] * K0
-	vmovdqu64	8*1+64*0(a0), A0
-	vmovdqu64	8*1+64*1(a0), A1
-	vmovdqu64	8*1+64*2(a0), A2
-	vmovdqu64	8*1+64*3(a0), A3
-	vmovdqu64	8*1+64*4(a0), A4{%k2}{z}
-	mov	8*0(a0), a0
+	vmovdqu64	8*1+64*0(%rsi), %zmm0
+	vmovdqu64	8*1+64*1(%rsi), %zmm20
+	vmovdqu64	8*1+64*2(%rsi), %zmm2
+	vmovdqu64	8*1+64*3(%rsi), %zmm3
+	vmovdqu64	8*1+64*4(%rsi), %zmm4{%k2}{z}
+	mov	8*0(%rsi), %rsi
 
 	# Load the modulii
-	vmovdqu64	8*1+64*0(m0), M0
-	vmovdqu64	8*1+64*1(m0), M1
-	vmovdqu64	8*1+64*2(m0), M2
-	vmovdqu64	8*1+64*3(m0), M3
-	vmovdqu64	8*1+64*4(m0), M4{%k2}{z}
-	mov	8*0(m0), m0
+	vmovdqu64	8*1+64*0(%rcx), %zmm5
+	vmovdqu64	8*1+64*1(%rcx), %zmm6
+	vmovdqu64	8*1+64*2(%rcx), %zmm7
+	vmovdqu64	8*1+64*3(%rcx), %zmm8
+	vmovdqu64	8*1+64*4(%rcx), %zmm9{%k2}{z}
+	mov	8*0(%rcx), %rcx
 
 	# Prepare the accumulators
-	vpxorq	ACC0, ACC0, ACC0
-	vpxorq	ACC1, ACC1, ACC1
-	vpxorq	ACC2, ACC2, ACC2
-	vpxorq	ACC3, ACC3, ACC3
-	vpxorq	ACC4, ACC4, ACC4
-	vpxorq	B_curr, B_curr, B_curr
-	vpxorq	Y_curr, Y_curr, Y_curr
+	vpxorq	%zmm10, %zmm10, %zmm10
+	vpxorq	%zmm11, %zmm11, %zmm11
+	vpxorq	%zmm12, %zmm12, %zmm12
+	vpxorq	%zmm13, %zmm13, %zmm13
+	vpxorq	%zmm14, %zmm14, %zmm14
+	vpxorq	%zmm18, %zmm18, %zmm18
+	vpxorq	%zmm16, %zmm16, %zmm16
 
 
 	# Hoist first low mul (high B and Y will be 0)
-	mov	a0, %rdx
-	mov	(b_ptr), %r14
-	lea	8(b_ptr), b_ptr
-	vpbroadcastq	%r14, B_curr
-	mulx	%r14, acc0, t2
+	mov	%rsi, %rdx
+	mov	(%rax), %r14
+	lea	8(%rax), %rax
+	vpbroadcastq	%r14, %zmm18
+	mulx	%r14, %r9, %r13
 
-	mov	acc0, %rdx
-	mulx	k0, %rdx, t0
+	mov	%r9, %rdx
+	mulx	%r8, %rdx, %r11
 	and	%r15, %rdx
-	vpbroadcastq	%rdx, Y_curr
+	vpbroadcastq	%rdx, %zmm16
 
-	mulx	m0, t0, t1
-	add	t0, acc0
-	adc	t1, t2
+	mulx	%rcx, %r11, %r12
+	add	%r11, %r9
+	adc	%r12, %r13
 
-	shrd	$52, t2, acc0
+	shrd	$52, %r13, %r9
 
-	vpmadd52luq	B_curr, A0, ACC0
-	vpmadd52luq	B_curr, A1, ACC1
-	vpmadd52luq	B_curr, A2, ACC2
-	vpmadd52luq	B_curr, A3, ACC3
-	vpmadd52luq	B_curr, A4, ACC4
+	vpmadd52luq	%zmm18, %zmm0, %zmm10
+	vpmadd52luq	%zmm18, %zmm20, %zmm11
+	vpmadd52luq	%zmm18, %zmm2, %zmm12
+	vpmadd52luq	%zmm18, %zmm3, %zmm13
+	vpmadd52luq	%zmm18, %zmm4, %zmm14
 
-	vpmadd52luq	Y_curr, M0, ACC0
-	vpmadd52luq	Y_curr, M1, ACC1
-	vpmadd52luq	Y_curr, M2, ACC2
-	vpmadd52luq	Y_curr, M3, ACC3
-	vpmadd52luq	Y_curr, M4, ACC4
+	vpmadd52luq	%zmm16, %zmm5, %zmm10
+	vpmadd52luq	%zmm16, %zmm6, %zmm11
+	vpmadd52luq	%zmm16, %zmm7, %zmm12
+	vpmadd52luq	%zmm16, %zmm8, %zmm13
+	vpmadd52luq	%zmm16, %zmm9, %zmm14
 
-	vmovq	ACC0_xmm, t0
-	add	t0, acc0
+	vmovq	%xmm10, %r11
+	add	%r11, %r9
 
-	mov	$39, itr
+	mov	$39, %r10
 
 1:
-		mov	(b_ptr), %r14
-		lea	8(b_ptr), b_ptr
-		mov	a0, %rdx
+		mov	(%rax), %r14
+		lea	8(%rax), %rax
+		mov	%rsi, %rdx
 
-		mulx	%r14, t0, t2
-		add	t0, acc0
-		adc	$0, t2
+		mulx	%r14, %r11, %r13
+		add	%r11, %r9
+		adc	$0, %r13
 
-		mov	acc0, %rdx
-		mulx	k0, %rdx, t0
+		mov	%r9, %rdx
+		mulx	%r8, %rdx, %r11
 		and	%r15, %rdx
 
-		mulx	m0, t0, t1
-		add	t0, acc0
-		adc	t1, t2
+		mulx	%rcx, %r11, %r12
+		add	%r11, %r9
+		adc	%r12, %r13
 
-		shrd	$52, t2, acc0
+		shrd	$52, %r13, %r9
 
 
 		# Shift the ACC in zmms right by a word
-		valignq $1, ACC0, ACC1, ACC0
-		valignq $1, ACC1, ACC2, ACC1
-		valignq $1, ACC2, ACC3, ACC2
-		valignq $1, ACC3, ACC4, ACC3
-		valignq $1, ACC4, ZERO, ACC4
+		valignq $1, %zmm10, %zmm11, %zmm10
+		valignq $1, %zmm11, %zmm12, %zmm11
+		valignq $1, %zmm12, %zmm13, %zmm12
+		valignq $1, %zmm13, %zmm14, %zmm13
+		valignq $1, %zmm14, %zmm30, %zmm14
 
 
 
 
 		# High multiplications
-		vpmadd52huq	B_curr, A0, ACC0
-		vpmadd52huq	B_curr, A1, ACC1
-		vpmadd52huq	B_curr, A2, ACC2
-		vpmadd52huq	B_curr, A3, ACC3
-		vpmadd52huq	B_curr, A4, ACC4
+		vpmadd52huq	%zmm18, %zmm0, %zmm10
+		vpmadd52huq	%zmm18, %zmm20, %zmm11
+		vpmadd52huq	%zmm18, %zmm2, %zmm12
+		vpmadd52huq	%zmm18, %zmm3, %zmm13
+		vpmadd52huq	%zmm18, %zmm4, %zmm14
 
-		vpmadd52huq	Y_curr, M0, ACC0
-		vpmadd52huq	Y_curr, M1, ACC1
-		vpmadd52huq	Y_curr, M2, ACC2
-		vpmadd52huq	Y_curr, M3, ACC3
-		vpmadd52huq	Y_curr, M4, ACC4
+		vpmadd52huq	%zmm16, %zmm5, %zmm10
+		vpmadd52huq	%zmm16, %zmm6, %zmm11
+		vpmadd52huq	%zmm16, %zmm7, %zmm12
+		vpmadd52huq	%zmm16, %zmm8, %zmm13
+		vpmadd52huq	%zmm16, %zmm9, %zmm14
 
 		# Low multiplications
-		vpbroadcastq	%r14, B_curr
-		vpbroadcastq	%rdx, Y_curr
+		vpbroadcastq	%r14, %zmm18
+		vpbroadcastq	%rdx, %zmm16
 
-		vpmadd52luq	B_curr, A0, ACC0
-		vpmadd52luq	B_curr, A1, ACC1
-		vpmadd52luq	B_curr, A2, ACC2
-		vpmadd52luq	B_curr, A3, ACC3
-		vpmadd52luq	B_curr, A4, ACC4
+		vpmadd52luq	%zmm18, %zmm0, %zmm10
+		vpmadd52luq	%zmm18, %zmm20, %zmm11
+		vpmadd52luq	%zmm18, %zmm2, %zmm12
+		vpmadd52luq	%zmm18, %zmm3, %zmm13
+		vpmadd52luq	%zmm18, %zmm4, %zmm14
 
-		vpmadd52luq	Y_curr, M0, ACC0
-		vpmadd52luq	Y_curr, M1, ACC1
-		vpmadd52luq	Y_curr, M2, ACC2
-		vpmadd52luq	Y_curr, M3, ACC3
-		vpmadd52luq	Y_curr, M4, ACC4
+		vpmadd52luq	%zmm16, %zmm5, %zmm10
+		vpmadd52luq	%zmm16, %zmm6, %zmm11
+		vpmadd52luq	%zmm16, %zmm7, %zmm12
+		vpmadd52luq	%zmm16, %zmm8, %zmm13
+		vpmadd52luq	%zmm16, %zmm9, %zmm14
 
-		vmovq	ACC0_xmm, t0
-		add	t0, acc0
+		vmovq	%xmm10, %r11
+		add	%r11, %r9
 
 
-		dec	itr
+		dec	%r10
 		jne 1b
 
-	vmovq	acc0, TMP_xmm
-	vmovdqa64	TMP, ACC0{%k1}
+	vmovq	%r9, %xmm1
+	vmovdqa64	%zmm1, %zmm10{%k1}
 
-	valignq	$7, A3, A4, A4
-	valignq	$7, A2, A3, A3
-	valignq	$7, A1, A2, A2
-	valignq	$7, A0, A1, A1
-	valignq	$7, ZERO, A0, A0
+	valignq	$7, %zmm3, %zmm4, %zmm4
+	valignq	$7, %zmm2, %zmm3, %zmm3
+	valignq	$7, %zmm20, %zmm2, %zmm2
+	valignq	$7, %zmm0, %zmm20, %zmm20
+	valignq	$7, %zmm30, %zmm0, %zmm0
 
-	valignq	$7, M3, M4, M4
-	valignq	$7, M2, M3, M3
-	valignq	$7, M1, M2, M2
-	valignq	$7, M0, M1, M1
-	valignq	$7, ZERO, M0, M0
+	valignq	$7, %zmm8, %zmm9, %zmm9
+	valignq	$7, %zmm7, %zmm8, %zmm8
+	valignq	$7, %zmm6, %zmm7, %zmm7
+	valignq	$7, %zmm5, %zmm6, %zmm6
+	valignq	$7, %zmm30, %zmm5, %zmm5
 
 	# The last high multiplications
-	vpmadd52huq	B_curr, A0, ACC0
-	vpmadd52huq	B_curr, A1, ACC1
-	vpmadd52huq	B_curr, A2, ACC2
-	vpmadd52huq	B_curr, A3, ACC3
-	vpmadd52huq	B_curr, A4, ACC4
+	vpmadd52huq	%zmm18, %zmm0, %zmm10
+	vpmadd52huq	%zmm18, %zmm20, %zmm11
+	vpmadd52huq	%zmm18, %zmm2, %zmm12
+	vpmadd52huq	%zmm18, %zmm3, %zmm13
+	vpmadd52huq	%zmm18, %zmm4, %zmm14
 
-	vpmadd52huq	Y_curr, M0, ACC0
-	vpmadd52huq	Y_curr, M1, ACC1
-	vpmadd52huq	Y_curr, M2, ACC2
-	vpmadd52huq	Y_curr, M3, ACC3
-	vpmadd52huq	Y_curr, M4, ACC4
+	vpmadd52huq	%zmm16, %zmm5, %zmm10
+	vpmadd52huq	%zmm16, %zmm6, %zmm11
+	vpmadd52huq	%zmm16, %zmm7, %zmm12
+	vpmadd52huq	%zmm16, %zmm8, %zmm13
+	vpmadd52huq	%zmm16, %zmm9, %zmm14
 
 	# Now 'normalize' the result to 52 bit words
-	vpsrlq	$52, ACC0, A0
-	vpsrlq	$52, ACC1, A1
-	vpsrlq	$52, ACC2, A2
-	vpsrlq	$52, ACC3, A3
-	vpsrlq	$52, ACC4, A4
+	vpsrlq	$52, %zmm10, %zmm0
+	vpsrlq	$52, %zmm11, %zmm20
+	vpsrlq	$52, %zmm12, %zmm2
+	vpsrlq	$52, %zmm13, %zmm3
+	vpsrlq	$52, %zmm14, %zmm4
 
-	vpandq	AND_MASK, ACC0, ACC0
-	vpandq	AND_MASK, ACC1, ACC1
-	vpandq	AND_MASK, ACC2, ACC2
-	vpandq	AND_MASK, ACC3, ACC3
-	vpandq	AND_MASK, ACC4, ACC4
+	vpandq	%zmm31, %zmm10, %zmm10
+	vpandq	%zmm31, %zmm11, %zmm11
+	vpandq	%zmm31, %zmm12, %zmm12
+	vpandq	%zmm31, %zmm13, %zmm13
+	vpandq	%zmm31, %zmm14, %zmm14
 
-	valignq	$7, A3, A4, A4
-	valignq	$7, A2, A3, A3
-	valignq	$7, A1, A2, A2
-	valignq	$7, A0, A1, A1
-	valignq	$7, ZERO, A0, A0
+	valignq	$7, %zmm3, %zmm4, %zmm4
+	valignq	$7, %zmm2, %zmm3, %zmm3
+	valignq	$7, %zmm20, %zmm2, %zmm2
+	valignq	$7, %zmm0, %zmm20, %zmm20
+	valignq	$7, %zmm30, %zmm0, %zmm0
 
-	vpaddq	A0, ACC0, ACC0
-	vpaddq	A1, ACC1, ACC1
-	vpaddq	A2, ACC2, ACC2
-	vpaddq	A3, ACC3, ACC3
-	vpaddq	A4, ACC4, ACC4
+	vpaddq	%zmm0, %zmm10, %zmm10
+	vpaddq	%zmm20, %zmm11, %zmm11
+	vpaddq	%zmm2, %zmm12, %zmm12
+	vpaddq	%zmm3, %zmm13, %zmm13
+	vpaddq	%zmm4, %zmm14, %zmm14
 
-	vpcmpuq	$1, ACC0, AND_MASK, %k1
-	vpcmpuq	$1, ACC1, AND_MASK, %k2
-	vpcmpuq	$1, ACC2, AND_MASK, %k3
-	vpcmpuq	$1, ACC3, AND_MASK, %k4
-	vpcmpuq	$1, ACC4, AND_MASK, %k5
+	vpcmpuq	$1, %zmm10, %zmm31, %k1
+	vpcmpuq	$1, %zmm11, %zmm31, %k2
+	vpcmpuq	$1, %zmm12, %zmm31, %k3
+	vpcmpuq	$1, %zmm13, %zmm31, %k4
+	vpcmpuq	$1, %zmm14, %zmm31, %k5
 
 	kmovb	%k1, %eax
 	kmovb	%k2, %ebx
@@ -336,11 +292,11 @@ AMM_2048_IFMA:
 	kmovb	%k4, %r11d
 	kmovb	%k5, %r12d
 
-	vpcmpuq	$0, AND_MASK, ACC0, %k1
-	vpcmpuq	$0, AND_MASK, ACC1, %k2
-	vpcmpuq	$0, AND_MASK, ACC2, %k3
-	vpcmpuq	$0, AND_MASK, ACC3, %k4
-	vpcmpuq	$0, AND_MASK, ACC4, %k5
+	vpcmpuq	$0, %zmm31, %zmm10, %k1
+	vpcmpuq	$0, %zmm31, %zmm11, %k2
+	vpcmpuq	$0, %zmm31, %zmm12, %k3
+	vpcmpuq	$0, %zmm31, %zmm13, %k4
+	vpcmpuq	$0, %zmm31, %zmm14, %k5
 
 	kmovb	%k1, %r8d
 	kmovb	%k2, %r9d
@@ -373,23 +329,23 @@ AMM_2048_IFMA:
 	kmovb	%r11d, %k4
 	kmovb	%r12d, %k5
 
-	vpsubq	AND_MASK, ACC0, ACC0{%k1}
-	vpsubq	AND_MASK, ACC1, ACC1{%k2}
-	vpsubq	AND_MASK, ACC2, ACC2{%k3}
-	vpsubq	AND_MASK, ACC3, ACC3{%k4}
-	vpsubq	AND_MASK, ACC4, ACC4{%k5}
+	vpsubq	%zmm31, %zmm10, %zmm10{%k1}
+	vpsubq	%zmm31, %zmm11, %zmm11{%k2}
+	vpsubq	%zmm31, %zmm12, %zmm12{%k3}
+	vpsubq	%zmm31, %zmm13, %zmm13{%k4}
+	vpsubq	%zmm31, %zmm14, %zmm14{%k5}
 
-	vpandq	AND_MASK, ACC0, ACC0
-	vpandq	AND_MASK, ACC1, ACC1
-	vpandq	AND_MASK, ACC2, ACC2
-	vpandq	AND_MASK, ACC3, ACC3
-	vpandq	AND_MASK, ACC4, ACC4
+	vpandq	%zmm31, %zmm10, %zmm10
+	vpandq	%zmm31, %zmm11, %zmm11
+	vpandq	%zmm31, %zmm12, %zmm12
+	vpandq	%zmm31, %zmm13, %zmm13
+	vpandq	%zmm31, %zmm14, %zmm14
 
-	vmovdqu64	ACC0, 64*0(res)
-	vmovdqu64	ACC1, 64*1(res)
-	vmovdqu64	ACC2, 64*2(res)
-	vmovdqu64	ACC3, 64*3(res)
-	vmovdqu64	ACC4, 64*4(res)
+	vmovdqu64	%zmm10, 64*0(%rdi)
+	vmovdqu64	%zmm11, 64*1(%rdi)
+	vmovdqu64	%zmm12, 64*2(%rdi)
+	vmovdqu64	%zmm13, 64*3(%rdi)
+	vmovdqu64	%zmm14, 64*4(%rdi)
 
 	pop	%r15
 	pop	%r14
