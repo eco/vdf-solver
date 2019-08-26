@@ -16,11 +16,11 @@
     },
     {
       "target_name": "modexp",
-      "sources": [ "modexp.cc", "rsaz-vpmadd.s" ],
+      "sources": [ "modexp.cc" ],
       "cflags!": [ "-fno-exceptions" ],
       "cflags_cc!": [ "-fno-exceptions" ],
       "include_dirs": ["<!@(node -p \"require('node-addon-api').include\")"],
-      "dependencies": ["<!(node -p \"require('node-addon-api').gyp\")"],
+      "dependencies": ["<!(node -p \"require('node-addon-api').gyp\")", "ifmasquare"],
       "defines": [ 'NAPI_DISABLE_CPP_EXCEPTIONS' ],
       "conditions": [
         [
@@ -51,6 +51,15 @@
           }
         ],
       ],
-    }
+    },
+    {
+       "target_name": "ifmasquare",
+       "type": "static_library",
+       "cflags": ["-mavx512ifma"],
+       "sources": ["rsaz-vpmadd.s"],
+       "xcode_settings": {
+          "OTHER_CFLAGS": [ "-mavx512ifma", "-mavx512bw", "-mavx512dq" ]
+       }
+    },
   ]
 }

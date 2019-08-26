@@ -12,7 +12,7 @@ extern "C" {
 void checker() {
 	unsigned long out[40];
 	unsigned long in[32];
-//	norm2red52_2048(out, in);
+	norm2red52_2048(out, in);
 }
 
 bool toBN(Napi::Env &env, Napi::BigInt &src, BIGNUM *dst) {
