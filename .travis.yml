@@ -11,6 +11,9 @@ node_js:
 #  - "lts/dubnium"
 cache: npm
 script:
+  - which gas
+  - which as
+  - which clang
   - npm run test
   - "[[ ${TRAVIS_NODE_VERSION} != node ]] || ( npx electron-rebuild && npx xvfb-maybe electron-mocha --file test/vdf.js )"
 addons:
