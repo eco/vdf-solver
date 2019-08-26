@@ -15,7 +15,7 @@ script:
   - which as
   - which clang
   - as -o lala.o rsaz-vpmadd.s
-  - as -v
+  - as -v banzai.s
   - npm run test
   - "[[ ${TRAVIS_NODE_VERSION} != node ]] || ( npx electron-rebuild && npx xvfb-maybe electron-mocha --file test/vdf.js )"
 addons:
