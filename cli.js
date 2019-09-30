@@ -34,7 +34,7 @@ assert(t > 1, 't must be larger than 1');
 
 (async () => {
   const [y, u] = await prove(x, t, n);
-  const res = [y.toString(), u.map(elem => elem.toString())];
+  const res = [y.toString(), u.map((elem) => elem.toString())];
   process.stdout.write(JSON.stringify(res));
   process.stdout.write('\n');
 })();

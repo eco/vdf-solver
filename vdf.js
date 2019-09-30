@@ -65,7 +65,7 @@ async function prove(xin, tin, nin, callback, prevstate) {
     state = {
       stops: BigInt(prevstate.stops),
       blocksize: BigInt(prevstate.blocksize),
-      ys: prevstate.ys.map(v => BigInt(v)),
+      ys: prevstate.ys.map((v) => BigInt(v)),
     };
   } else {
     const stops = 1n << BigInt(Math.min(Number(tin), factors.length - 1));
@@ -92,7 +92,7 @@ async function prove(xin, tin, nin, callback, prevstate) {
         if (!await callback({
           stops: state.stops.toString(),
           blocksize: state.blocksize.toString(),
-          ys: state.ys.map(v => v.toString()),
+          ys: state.ys.map((v) => v.toString()),
         }, Number(i), Number(state.stops))) {
           return [];
         }
@@ -114,7 +114,7 @@ async function prove(xin, tin, nin, callback, prevstate) {
     if (f) {
       uiprime = 1n;
       f.forEach(([divisor, dividend, rfac]) => {
-        let base = state.ys[state.stops * divisor / dividend];
+        let base = state.ys[(state.stops * divisor) / dividend];
 
         if (rfac && rfac.length > 0) {
           let e = 1n;
