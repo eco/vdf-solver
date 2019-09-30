@@ -1,5 +1,5 @@
-[![Build Status](https://travis-ci.com/BeamNetwork/vdf-solver.svg?token=poXnpmiA2RAigkqypVN5&branch=master)](https://travis-ci.com/BeamNetwork/vdf-solver)
-[![Coverage Status](https://coveralls.io/repos/github/BeamNetwork/vdf-solver/badge.svg?branch=master)](https://coveralls.io/github/BeamNetwork/vdf-solver?branch=master)
+[![Build Status](https://travis-ci.com/Eco/vdf-solver.svg?token=poXnpmiA2RAigkqypVN5&branch=master)](https://travis-ci.com/Eco/vdf-solver)
+[![Coverage Status](https://coveralls.io/repos/github/Eco/vdf-solver/badge.svg?branch=master)](https://coveralls.io/github/Eco/vdf-solver?branch=master)
 
 # vdf-solver
 Standalone VDF Solver

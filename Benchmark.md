@@ -1,7 +1,7 @@
 ## Usage
 
 ```
-git clone https://github.com/BeamNetwork/vdf-solver.git
+git clone https://github.com/Eco/vdf-solver.git
 cd vdf-solver
 nvm install node
 nvm use node
