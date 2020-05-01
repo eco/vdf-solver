@@ -8,7 +8,7 @@
           'copies': [{
             'destination': '<(PRODUCT_DIR)',
             'files': [
-              '<(module_root_dir)/openssl-1.1.1d-win64-mingw/libcrypto-1_1-x64.dll',
+              '<(module_root_dir)/openssl-1.1.1g-win64-mingw/libcrypto-1_1-x64.dll',
             ]
           }]
         }]
@@ -43,10 +43,10 @@
         [
           'OS=="win"', {
             'include_dirs': [
-              '<(module_root_dir)/openssl-1.1.1d-win64-mingw/include',
+              '<(module_root_dir)/openssl-1.1.1g-win64-mingw/include',
             ],
             'libraries': [
-              '-l<(module_root_dir)/openssl-1.1.1d-win64-mingw/lib/libcrypto.dll.a'
+              '-l<(module_root_dir)/openssl-1.1.1g-win64-mingw/lib/libcrypto.dll.a'
             ],
           }
         ],
