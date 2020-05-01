@@ -9,17 +9,17 @@ const rimraf = require('rimraf');
 (async () => {
   if (process.platform === 'win32') {
     rimraf.sync('openssl.zip');
-    rimraf.sync('openssl-1.1.1d-win64-mingw');
+    rimraf.sync('openssl-1.1.1g-win64-mingw');
 
     const data = await rp({
-      uri: 'https://bintray.com/vszakats/generic/download_file?file_path=openssl-1.1.1d-win64-mingw.zip',
+      uri: 'https://bintray.com/vszakats/generic/download_file?file_path=openssl-1.1.1g-win64-mingw.zip',
       encoding: null,
     });
 
     const hash = crypto.createHash('sha256');
     hash.update(data, 'binary');
 
-    assert.strictEqual(hash.digest('hex'), '74106c80ac74a7be49174593578a587be1b3e2efdc3a29e865945f07ada623f2');
+    assert.strictEqual(hash.digest('hex'), '61f2dbe1ba7cc5742f0b8492288cfcb2df2e40178e28eb3645dd073785bfb258');
 
     fs.writeFileSync('openssl.zip', data);
 

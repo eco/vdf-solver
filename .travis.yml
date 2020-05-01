@@ -7,11 +7,12 @@ os:
   - windows
 node_js:
   - "node"
-  - "lts/dubnium"
+  - "lts/erbium"
 cache: npm
 script:
   - npm run test
-  - "[[ ${TRAVIS_NODE_VERSION} != node ]] || ( npx electron-rebuild && npx xvfb-maybe electron-mocha --file test/vdf.js )"
+  - npx electron-rebuild
+  - npx xvfb-maybe electron-mocha --file test/vdf.js
 addons:
   homebrew:
     packages:
