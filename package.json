@@ -33,7 +33,7 @@
     "chai": "^4.2.0",
     "coveralls": "^3.1.0",
     "depcheck": "^0.9.2",
-    "electron": "^8.2.5",
+    "electron": "^11.5.0",
     "electron-mocha": "^8.2.1",
     "electron-rebuild": "^1.10.1",
     "eslint": "^6.8.0",
